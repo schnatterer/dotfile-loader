@@ -1,4 +1,10 @@
-# shortcut to this dotfiles path
+function debug() {
+    [[ -n "${DEBUG}" ]] && echo DEBUG "$@"
+}
+
+if [[ -n "${TRACE}" ]]; then set -x; fi
+
+# shortcut to this dotfiles path is $ZSH
 export DOTFILES_ROOT=$HOME/.dotfiles
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
@@ -6,6 +12,7 @@ export DOTFILES_ROOT=$HOME/.dotfiles
 # you'll have access to them in your scripts.
 if [[ -a ~/.localrc ]]
 then
+  debug "source ~/.localrc"
   source ~/.localrc
 fi
 
@@ -13,25 +20,28 @@ fi
 typeset -U config_files
 config_files=($DOTFILES_ROOT/**/*.zsh)
 
-# load the path files
+debug "load the path files"
 for file in ${(M)config_files:#*/path.zsh}
 do
+  debug "  source $file"
   source $file
 done
 
-# load everything but the path and completion files
+debug load everything but the path and completion files
 for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
 do
+  debug "  source $file"
   source $file
 done
 
-# initialize autocomplete here, otherwise functions won't be loaded
+debug "initialize autocomplete here, otherwise functions won't be loaded"
 autoload -U compinit
 compinit
 
-# load every completion after autocomplete loads
+debug "load every completion after autocomplete loads"
 for file in ${(M)config_files:#*/completion.zsh}
 do
+  debug "  source $file"
   source $file
 done
 

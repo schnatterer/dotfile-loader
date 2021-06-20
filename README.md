@@ -87,6 +87,10 @@ docker build -t dotfiles --build-arg UID=$(id -u) --build-arg GID=$(id -g) .
 docker run --rm -it dotfiles
 # Mount your local .dotfiles, helpful for development
 docker run --rm -it -v $(pwd):/home/dev/.dotfiles dotfiles
+# Print some debug statements to better understand order of loading
+docker run --rm -it -v $(pwd):/home/dev/.dotfiles -e DEBUG dotfiles
+# Print every command (`set -x`)
+docker run --rm -it -v $(pwd):/home/dev/.dotfiles -e TRACE dotfiles
 ```
 
 Note that if you're using external plugins or themes in oh-my-zsh you might have to install them in `Dockerfile` in 
