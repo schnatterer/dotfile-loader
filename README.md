@@ -75,9 +75,19 @@ and I'd love to get it fixed for you!
 
 ## thanks
 
-I forked [Ryan Bates](http://github.com/ryanb)' excellent
-[dotfiles](http://github.com/ryanb/dotfiles) for a couple years before the
-weight of my changes and tweaks inspired me to finally roll my own. But Ryan's
-dotfiles were an easy way to get into bash customization, and then to jump ship
-to zsh a bit later. A decent amount of the code in these dotfiles stem or are
-inspired from Ryan's original project.
+I forked [holman](http://github.com/holman) 's excellent [dotfiles](http://github.com/holman/dotfiles).
+
+## Development
+
+Try dotfiles using docker
+
+```shell
+docker build -t dotfiles --build-arg UID=$(id -u) --build-arg GID=$(id -g) .
+# Run with dotfiles bundled in image
+docker run --rm -it dotfiles
+# Mount your local .dotfiles, helpful for development
+docker run --rm -it -v $(pwd):/home/dev/.dotfiles dotfiles
+```
+
+Note that if you're using external plugins or themes in oh-my-zsh you might have to install them in `Dockerfile` in 
+order to avoid errors on container start. 
