@@ -1,3 +1,11 @@
+TODO
+* Clone dotfiles repo with bootstrap?
+* Update README 
+  * general intro
+  * in dotfiles repo: git/gitconfig
+  * convention: no zshrc.symlink, no gitconfig.symlink -> taken care of by dotfiles-bootstrap
+
+
 # holman does dotfiles
 
 Your dotfiles are how you personalize your system. These are mine.

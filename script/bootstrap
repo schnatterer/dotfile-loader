@@ -2,8 +2,9 @@
 #
 # bootstrap installs things.
 
-cd "$(dirname "$0")/.."
-DOTFILES_ROOT=$(pwd -P)
+BASEDIR=$(dirname $0)
+DOTFILES_LOADER_ROOT="$(cd ${BASEDIR}/.. && pwd)"
+DOTFILES_ROOT=$HOME/.dotfiles
 
 set -e
 
@@ -28,7 +29,7 @@ fail() {
 }
 
 setup_gitconfig() {
-  if ! [ -f git/gitconfig.local.symlink ]; then
+  if ! [ -f "${DOTFILES_LOADER_ROOT}/git/gitconfig.local" ]; then
     info 'setup gitconfig'
 
     git_credential='cache'
@@ -41,7 +42,11 @@ setup_gitconfig() {
     user ' - What is your github author email?'
     read -e git_authoremail
 
-    sed -e "s/AUTHORNAME/$git_authorname/g" -e "s/AUTHOREMAIL/$git_authoremail/g" -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" git/gitconfig.local.symlink.example >git/gitconfig.local.symlink
+    sed -e "s/AUTHORNAME/$git_authorname/g" \
+        -e "s/AUTHOREMAIL/$git_authoremail/g" \
+        -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
+        "${DOTFILES_LOADER_ROOT}/git/gitconfig.local.example" \
+        > "${DOTFILES_LOADER_ROOT}/git/gitconfig.local"
 
     success 'gitconfig'
   fi
@@ -121,12 +126,23 @@ link_file() {
   fi
 }
 
+link_dotfile_loader() {
+  dotfile_loader_files=( "${DOTFILES_LOADER_ROOT}/zsh/zshrc" "${DOTFILES_LOADER_ROOT}/git/gitconfig" )
+
+  local overwrite_all=false backup_all=false skip_all=false
+
+  for src in "${dotfile_loader_files[@]}"; do
+    dst="$HOME/.$(basename "${src}")"
+    link_file "$src" "$dst"
+  done
+}
+
 install_dotfiles() {
   info 'installing dotfiles'
 
   local overwrite_all=false backup_all=false skip_all=false
 
-  for src in $(find -H "$DOTFILES_ROOT" -maxdepth 2 -name '*.symlink' -not -path '*.git*'); do
+  for src in $(find -H "$DOTFILES_ROOT" -maxdepth 2 -name '*.symlink' -not -path '*.git*' -not -name 'zshrc.symlink' -not -name 'gitconfig.symlink'); do
     dst="$HOME/.$(basename "${src%.*}")"
     link_file "$src" "$dst"
   done
@@ -134,10 +150,11 @@ install_dotfiles() {
 
 runDotfileInstallers() {
   # find the installers and run them iteratively
-  find . -name install.sh | while read installer; do sh -c "${installer}"; done
+  find "${DOTFILES_ROOT}" -name install.sh | while read installer; do sh -c "${installer}"; done
 }
 
 setup_gitconfig
+link_dotfile_loader
 install_dotfiles
 runDotfileInstallers
 

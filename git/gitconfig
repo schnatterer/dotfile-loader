@@ -1,0 +1,4 @@
+# Local/private config goes in the include
+[include]
+        path = ~/.dotfiles-loader/git/gitconfig.local
+        path = ~/.dotfiles/git/gitconfig
