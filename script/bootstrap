@@ -28,6 +28,21 @@ fail() {
   exit
 }
 
+clone_dotfiles() {
+  if ! [ -d "${DOTFILES_ROOT}" ]; then
+
+    if [ -z "${dotfiles_repo}" ]; then
+      user ' - Which dotfiles repo should be used?'
+      read -e dotfiles_repo
+    fi
+    info "Cloning dotfiles ${dotfiles_repo} repo to $HOME/.dotfiles"
+
+    git clone "${dotfiles_repo}" ~/.dotfiles > /dev/null 2>&1
+
+    success 'clone dotfiles'
+  fi
+}
+
 setup_gitconfig() {
   if ! [ -f "${DOTFILES_LOADER_ROOT}/git/gitconfig.local" ]; then
     info 'setup gitconfig'
@@ -153,6 +168,7 @@ runDotfileInstallers() {
   find "${DOTFILES_ROOT}" -name install.sh | while read installer; do sh -c "${installer}"; done
 }
 
+clone_dotfiles
 setup_gitconfig
 link_dotfile_loader
 install_dotfiles

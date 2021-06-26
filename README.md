@@ -1,5 +1,4 @@
 TODO
-* Clone dotfiles repo with bootstrap?
 * Update README 
   * general intro
   * in dotfiles repo: git/gitconfig
