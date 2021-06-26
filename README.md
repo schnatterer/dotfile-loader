@@ -1,7 +1,8 @@
-# dotfiles-loader
+dotfiles-loader
+===
 
 dotfiles are how you personalize your system. This is a generalized loader for dotfiles that implements a topic basic
-approach (as opposed to a monolithic zshrc), as first described in 
+approach (as opposed to a monolithic zshrc), as first described in
 [holman/dotfiles](https://github.com/holman/dotfiles).
 
 Other than the original dotfiles repo, dotfiles-loader does not include any user specific dotfiles, only the code to
@@ -10,24 +11,36 @@ This way code for loading and actual user specific config can be separated.
 No need to fork a repo full of config you don't need. Just create a new `dotfile` repo from scratch.
 Mine is [schnatterer/dotfiles](https://github.com/schnatterer/dotfiles), for example.
 
-In addition it is compatible with [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) 🎉.
-Dotfile-loader also simplifies the process (in my opinion) compared to holman/dotfiles:
+In addition it is compatible with [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) 🎉.  
+Dotfile-loader also simplifies the process (in my opinion) compared to holman/dotfiles:  
 There is no `dot`, no `install`, just one `bootstrap` script that needs to be called.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+## Contents 
+
+- [Try it](#try-it)
+- [Install](#install)
+- [Structure for dotfile repos](#structure-for-dotfile-repos)
+  - [topical](#topical)
+  - [components](#components)
+- [Development](#development)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Try it
 
 You can play around with the loader, no strings attached, using docker.
 
 ```shell
-docker build -t dotfiles
-# Run interactive bootstrap
-docker run --rm -it dotfiles
+docker run --rm -it ghcr.io/schnatterer/dotfiles-loader
 
 # Skip interactive mode, e.g. using my dotfiles repo as an example
 docker run --rm -it \
   -e dotfiles_repo=https://github.com/schnatterer/dotfiles \
   -v $(pwd)/git/gitconfig.local.example:/home/dev/.dotfiles-loader/git/gitconfig.local \
-  dotfiles \
+  ghcr.io/schnatterer/dotfiles-loader \
   -c 'echo O | .dotfiles-loader/script/bootstrap && zsh'
 ```
 
@@ -38,8 +51,10 @@ Prerequisites: `bash`, `zsh`, `git`. And a dotfile repo, preferably your own.
 ```shell
 git clone https://github.com/schnatterer/dotfiles-loader .dotfiles-loader
 
-# This script will interactively lead you through the setup, where you enter your url to your actual dotfile repo
-# It will clone your dotfile repo to ~/.dotfiles, creates symlinks, making sure they are initialized on the next shell start
+# This script will interactively lead you through the setup, where you enter the url to your actual 
+# dotfile repo.
+# The dotfile repo is cloned to ~/.dotfiles. Then symlinks are created making sure the dotfiles
+# are initialized on the next shell start.
 # Everything is configured and tweaked within `~/.dotfiles`.
 ~/.dotfiles-loader/script/bootstrap
 
@@ -50,9 +65,9 @@ dotfiles_repo=https://github.com/schnatterer/dotfiles ~/.dotfiles-loader/script/
 BTW - once installed you can call `bootstrap` again any time. It should be idempotent, just running all `install.sh`s 
 from your dotfiles repo again.
 
-## Structure / conventions for dotfile repos
+## Structure for dotfile repos
 
-For you're own dotfiles repo, adhere to the following principals
+For you're own dotfiles repo, adhere to the following structure or conventions
 
 ### topical
 
@@ -83,15 +98,16 @@ There's a few special files in the hierarchy.
 
 ```shell
 # Mount your local .dotfiles-loader, helpful for development
-docker run --rm -it -v $(pwd):/home/dev/.dotfiles-loader dotfiles
+docker run --rm -it -v $(pwd):/home/dev/.dotfiles-loader ghcr.io/schnatterer/dotfiles-loader
 # Mounting your local dotfiles will speed up the start
-docker run --rm -it -v $(pwd):/home/dev/.dotfiles-loader -v $HOME/.dotfiles:/home/dev/.dotfiles dotfiles
+docker run --rm -it -v $(pwd):/home/dev/.dotfiles-loader -v $HOME/.dotfiles:/home/dev/.dotfiles \
+  ghcr.io/schnatterer/dotfiles-loader
 # Run non-interactively, speeding up even more:
-docker run --rm -it -v $(pwd):/home/dev/.dotfiles-loader -v $HOME/.dotfiles:/home/dev/.dotfiles dotfiles -c 'echo O | .dotfiles-loader/script/bootstrap && zsh'
-
+docker run --rm -it -v $(pwd):/home/dev/.dotfiles-loader -v $HOME/.dotfiles:/home/dev/.dotfiles \
+  ghcr.io/schnatterer/dotfiles-loader -c 'echo O | .dotfiles-loader/script/bootstrap && zsh'
 
 # Print some debug statements to better understand order of loading
-docker run --rm -it -e DEBUG dotfiles
+docker run --rm -it -e DEBUG ghcr.io/schnatterer/dotfiles-loader
 # Print every command (`set -x`)
-docker run --rm -it -e TRACE dotfiles
+docker run --rm -it -e TRACE ghcr.io/schnatterer/dotfiles-loader
 ```
