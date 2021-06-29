@@ -11,17 +11,20 @@ This way code for loading and actual user specific config can be separated.
 No need to fork a repo full of config you don't need. Just create a new `dotfile` repo from scratch.
 Mine is [schnatterer/dotfiles](https://github.com/schnatterer/dotfiles), for example.
 
-In addition it is compatible with [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) 🎉.  
 Dotfile-loader also simplifies the process (in my opinion) compared to holman/dotfiles:  
 There is no `dot`, no `install`, just one `bootstrap` script that needs to be called.
+
+It also provides some [additional features](#additional-features) like debugging, profiling and simple benchmarking
+and compatibility with [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) 🎉.
+
+## Contents 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-## Contents 
-
 - [Try it](#try-it)
 - [Install](#install)
+- [Additional features](#additional-features)
 - [Structure for dotfile repos](#structure-for-dotfile-repos)
   - [topical](#topical)
   - [components](#components)
@@ -64,6 +67,26 @@ dotfiles_repo=https://github.com/schnatterer/dotfiles ~/.dotfiles-loader/script/
 
 BTW - once installed you can call `bootstrap` again any time. It should be idempotent, just running all `install.sh`s 
 from your dotfiles repo again.
+
+## Additional features 
+
+* Compatibility with [oh-my-zsh](https://github.com/ohmyzsh/ohmyzsh) 🎉  
+  See [my dotfiles](https://github.com/schnatterer/dotfiles/tree/b013a3/oh-my-zsh) for an example
+* Special env vars to improve your dotfiles.
+    * `DEBUG` debug output - helps to better understand what happens during startup.
+    * `BENCH` - prints loading times of each source file.  
+      This helps to quickly identify potentials for speeding up your loading times.
+    * `PROFILE` - prints every command with timestamp to a file (path is printed).  
+      If you need even more insight in loading times this is for you.  
+      See [Kevin Burkes post](https://kevin.burke.dev/kevin/profiling-zsh-startup-time/) on how to process the result and
+      find the culprits that slow down your shell startup.
+    * `TRACE` - prints every command during startup to stdout (`set -x`)
+
+Use them like so, for example
+
+```shell
+BENCH=1 zsh
+```
 
 ## Structure for dotfile repos
 

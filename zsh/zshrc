@@ -1,19 +1,46 @@
+function benchSource() {
+    if [[ -n "${BENCH}" ]]; then
+        local start=$(date +%s.%N)
+        source "$1"
+        local end=$(date +%s.%N)
+        local runtime=$((end-start))
+        
+        echo "${runtime}: $1" 
+    else
+        source "$1"
+    fi
+}
+
 function debug() {
     [[ -n "${DEBUG}" ]] && echo DEBUG "$@"
 }
 
-if [[ -n "${TRACE}" ]]; then set -x; fi
+[[ -n "${TRACE}" ]] && set -x
+[[ -n "${BENCH}" ]] && START_TIME=$(date +%s.%N) && echo "Benchmarking loading times in seconds"
 
 # shortcut to this dotfiles path is $ZSH
 export DOTFILES_ROOT=$HOME/.dotfiles
+
+if [[ -n  "${PROFILE}" ]]; then
+    # See https://kevin.burke.dev/kevin/profiling-zsh-startup-time/ 
+    local startupLog=/tmp/startlog.$$
+    echo "Profiling to ${startupLog}"
+    # http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html
+    PS4=$'%D{%M%S%.} %N:%i> '
+    exec 3>&2 2> $startupLog
+    setopt xtrace prompt_subst
+    
+    # For other alternatives to tracing see: 
+    # https://stackoverflow.com/questions/5014823/how-to-profile-a-bash-shell-script-slow-startup    
+fi
 
 # Stash your environment variables in ~/.localrc. This means they'll stay out
 # of your main dotfiles repository (which may be public, like this one), but
 # you'll have access to them in your scripts.
 if [[ -a ~/.localrc ]]
 then
-  debug "source ~/.localrc"
-  source ~/.localrc
+  debug "sourcing ~/.localrc"
+  benchSource ~/.localrc
 fi
 
 # all of our zsh files
@@ -23,15 +50,15 @@ config_files=($DOTFILES_ROOT/**/*.zsh)
 debug "load the path files"
 for file in ${(M)config_files:#*/path.zsh}
 do
-  debug "  source $file"
-  source $file
+  debug "  sourcing $file"
+  benchSource $file
 done
 
 debug load everything but the path and completion files
 for file in ${${config_files:#*/path.zsh}:#*/completion.zsh}
 do
-  debug "  source $file"
-  source $file
+  debug "  sourcing $file"
+  benchSource $file
 done
 
 debug add each topic folder to fpath so that they can add functions and completion scripts
@@ -55,10 +82,18 @@ compinit
 debug "load every completion after autocomplete loads"
 for file in ${(M)config_files:#*/completion.zsh}
 do
-  debug "  source $file"
-  source $file
+  debug "  sourcing $file"
+  benchSource $file
 done
 
 unset config_files
 
 export PATH="$DOTFILES_ROOT/bin:$PATH"
+
+if [[ -n  "${PROFILE}" ]]; then
+    unsetopt xtrace
+    exec 2>&3 3>&-
+fi
+
+[[ -n "${BENCH}" ]] && echo "Startup took: $(($(date +%s.%N)-START_TIME))"
+[[ -n "${TRACE}" ]] && set +x
